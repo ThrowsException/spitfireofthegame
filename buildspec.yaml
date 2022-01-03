@@ -4,4 +4,4 @@ phases:
   build:
     on-failure: ABORT | CONTINUE
     commands:
-      - aws s3 cp s3://spitfireofthegame.com ./*
+      - aws s3 cp ./src/* s3://spitfireofthegame.com
