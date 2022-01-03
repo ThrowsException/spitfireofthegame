@@ -19,7 +19,7 @@ resource "aws_codepipeline" "codepipeline" {
       output_artifacts = ["source_output"]
 
       configuration = {
-        ConnectionArn    = aws_codestarconnections_connection.github.arn
+        ConnectionArn    = data.aws_codestarconnections_connection.github.arn
         FullRepositoryId = "ThrowsException/spitfireofthegame"
         BranchName       = "master"
       }
@@ -74,42 +74,51 @@ resource "aws_iam_role_policy" "codepipeline_policy" {
   name = "codepipeline_policy"
   role = aws_iam_role.codepipeline_role.id
 
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
+  policy = jsonencode(
     {
-      "Effect":"Allow",
-      "Action": [
-        "s3:GetObject",
-        "s3:GetObjectVersion",
-        "s3:GetBucketVersioning",
-        "s3:PutObjectAcl",
-        "s3:PutObject"
-      ],
-      "Resource": [
-        "${aws_s3_bucket.codepipeline_bucket.arn}",
-        "${aws_s3_bucket.codepipeline_bucket.arn}/*"
+      "Version" : "2012-10-17",
+      "Statement" : [
+        {
+          "Effect" : "Allow",
+          "Action" : [
+            "s3:*",
+            # "s3:GetObject",
+            # "s3:GetObjectVersion",
+            # "s3:GetBucketVersioning",
+            # "s3:PutObjectAcl",
+            # "s3:PutObject"
+          ],
+          "Resource" : [
+            "${aws_s3_bucket.codepipeline_bucket.arn}",
+            "${aws_s3_bucket.codepipeline_bucket.arn}/*",
+            "${aws_s3_bucket.website.arn}/*",
+            "${aws_s3_bucket.website.arn}",
+          ]
+        },
+        {
+          "Effect" : "Allow",
+          "Action" : [
+            "codestar-connections:UseConnection"
+          ],
+          "Resource" : "${data.aws_codestarconnections_connection.github.arn}"
+        },
+        {
+          "Effect" : "Allow",
+          "Action" : [
+            "codebuild:BatchGetBuilds",
+            "codebuild:StartBuild"
+          ],
+          "Resource" : "*"
+        }
       ]
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "codestar-connections:UseConnection"
-      ],
-      "Resource": "${aws_codestarconnections_connection.github.arn}"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "codebuild:BatchGetBuilds",
-        "codebuild:StartBuild"
-      ],
-      "Resource": "*"
-    }
-  ]
-}
-EOF
+  })
 }
 
+# data "aws_s3_bucket" "codepipeline" {
+#   bucket = "codepipeline-us-east-1-463096050773"
+# }
 
+resource "aws_s3_bucket" "codepipeline_bucket" {
+  bucket = "cjo-codepipeline"
+  acl    = "private"
+}

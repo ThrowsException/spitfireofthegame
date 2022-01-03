@@ -1,0 +1,7 @@
+version: 0.2
+
+phases:
+  build:
+    on-failure: ABORT | CONTINUE
+    commands:
+      - aws s3 cp s3://spitfireofthegame.com ./*
