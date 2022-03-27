@@ -3,7 +3,7 @@ resource "aws_codepipeline" "codepipeline" {
   role_arn = aws_iam_role.codepipeline_role.arn
 
   artifact_store {
-    location = data.aws_s3_bucket.codepipeline_bucket.bucket
+    location = aws_s3_bucket.codepipeline_bucket.bucket
     type     = "S3"
   }
 
@@ -94,8 +94,8 @@ resource "aws_iam_role_policy" "codepipeline_policy" {
             "s3:PutObject"
           ],
           "Resource" : [
-            "${data.aws_s3_bucket.codepipeline_bucket.arn}",
-            "${data.aws_s3_bucket.codepipeline_bucket.arn}/*",
+            "${aws_s3_bucket.codepipeline_bucket.arn}",
+            "${aws_s3_bucket.codepipeline_bucket.arn}/*",
             "${aws_s3_bucket.website.arn}/*",
             "${aws_s3_bucket.website.arn}",
           ]
@@ -149,11 +149,19 @@ resource "aws_codebuild_project" "example" {
   }
 }
 
-data "aws_s3_bucket" "codepipeline_bucket" {
-  bucket = "codepipeline-us-east-1-463096050773"
+
+resource "aws_s3_bucket_public_access_block" "codepipeline_bucket" {
+  bucket = aws_s3_bucket.codepipeline_bucket.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+
 }
 
-# resource "aws_s3_bucket" "codepipeline_bucket" {
-#   bucket = "cjo-codepipeline"
-#   acl    = "private"
-# }
+resource "aws_s3_bucket" "codepipeline_bucket" {
+  bucket = "cjo-codepipeline"
+  acl    = "private"
+}
+
