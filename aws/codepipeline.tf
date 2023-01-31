@@ -47,7 +47,7 @@ resource "aws_codepipeline" "codepipeline" {
 }
 
 data "aws_codestarconnections_connection" "github" {
-  arn = "arn:aws:codestar-connections:us-east-1:063754174791:connection/f82bad92-5580-4ef2-8ae7-21688ba9c04f"
+  arn = "arn:aws:codestar-connections:us-east-1:063754174791:connection/cd4f6111-d70a-4526-a075-34ad5b9cfc54"
 }
 
 resource "aws_iam_role" "codepipeline_role" {
